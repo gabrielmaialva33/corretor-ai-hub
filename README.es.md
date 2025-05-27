@@ -1,183 +1,296 @@
-# Hub de IA Inmobiliaria
+# Corretor AI Hub
 
-Una plataforma de IA conversacional multi-inquilino para agentes inmobiliarios, integrando WhatsApp Business a través de EVO API con coincidencia inteligente de propiedades, programación de citas y gestión de leads.
+🏠 **Plataforma de IA conversacional multi-tenant para agentes inmobiliarios**
 
-## 🚀 Características
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-- **Conversaciones Impulsadas por IA**: Procesamiento de lenguaje natural para consultas de propiedades en portugués
-- **Arquitectura Multi-Inquilino**: Entornos aislados para cada agente inmobiliario
-- **Integración con WhatsApp Business**: Mensajería perfecta a través de EVO API
-- **Coincidencia Inteligente de Propiedades**: Búsqueda semántica basada en vectores para recomendaciones de propiedades
-- **Programación de Citas**: Integración con Google Calendar con recordatorios automatizados
-- **Gestión de Leads**: Puntuación y calificación automática de leads
-- **Plataforma de Soporte al Cliente**: Integración con Chatwoot para transferencia a humanos
-- **Dashboard de Analytics**: Métricas en tiempo real e insights de conversaciones
+[English](README.md) | [Español](README.es.md) | [Português](README.pt.md)
+
+## 📋 Visión General
+
+**Corretor AI Hub** es una plataforma completa de automatización inteligente para agentes inmobiliarios de REMAX Argentina. El sistema integra WhatsApp Business vía EVO API con un asistente de IA conversacional, ofreciendo atención automatizada 24/7, búsqueda inteligente de propiedades, programación de visitas y gestión calificada de leads.
+
+### 🎯 Principales Beneficios
+
+- **Atención 24/7**: Responde consultas instantáneamente, incluso fuera del horario comercial
+- **Calificación Automática**: Identifica y califica leads según sus preferencias
+- **Programación Inteligente**: Agenda visitas directamente en Google Calendar del agente
+- **Multi-idiomas**: Soporte nativo para Español, Portugués e Inglés
+- **Análisis en Tiempo Real**: Dashboard con métricas de conversión y engagement
+
+## 🚀 Funcionalidades
+
+### ✅ Implementadas
+
+- **🤖 Asistente IA Conversacional**
+  - Respuestas humanizadas con GPT-4
+  - Consolidación de múltiples preguntas
+  - Detección de intención para handoff humano
+  
+- **📱 Integración WhatsApp Business**
+  - Recepción y envío de mensajes
+  - Soporte para texto, audio e imágenes
+  - Segunda línea dedicada por agente
+
+- **🏢 Sistema Multi-Tenant**
+  - Aislamiento completo entre agentes
+  - Configuraciones personalizadas por tenant
+  - Base de datos segregada
+
+- **📅 Gestión de Citas**
+  - Integración con Google Calendar
+  - Ofrece 2 opciones de horarios
+  - Recordatorios automáticos (24h y 3h antes)
+
+- **👥 Gestión de Leads**
+  - Captura automática de datos
+  - Score de calificación
+  - Historial de interacciones
+
+- **🏷️ Clasificación Automática**
+  - Etiquetas en Chatwoot por estado
+  - Priorización de atención
+  - Métricas de conversión
+
+### 🚧 En Desarrollo
+
+- **🔍 Scraping REMAX Argentina** - Búsqueda automática de propiedades en el sitio oficial
+- **🎯 Matching Inteligente** - Correlación entre nuevas propiedades y leads antiguos
+- **📸 Procesamiento Multimedia** - Análisis de imágenes y transcripción de audios
+- **🔔 Notificaciones Proactivas** - Alertas sobre oportunidades para el agente
 
 ## 🏗️ Arquitectura
 
+### Visión General del Sistema
+
+```mermaid
+graph TB
+    subgraph "Capa Cliente"
+        WA[WhatsApp Business]
+        CW[Chatwoot Hub]
+    end
+    
+    subgraph "Backend"
+        API[FastAPI]
+        AI[AI Agent<br/>LangChain]
+        SCRAPER[REMAX Scraper]
+    end
+    
+    subgraph "Datos"
+        PG[(PostgreSQL)]
+        QDRANT[(Vector DB)]
+        REDIS[(Cache)]
+    end
+    
+    WA --> API
+    CW --> API
+    API --> AI
+    API --> SCRAPER
+    AI --> QDRANT
+    SCRAPER --> REDIS
+    API --> PG
 ```
-┌─────────────────┐     ┌──────────────┐     ┌─────────────────┐
-│   WhatsApp      │────▶│   EVO API    │────▶│   FastAPI       │
-│   Business      │     │   Webhook    │     │   Backend       │
-└─────────────────┘     └──────────────┘     └────────┬────────┘
-                                                       │
-                               ┌───────────────────────┴───────────────────────┐
-                               │                                               │
-                        ┌──────▼──────┐  ┌─────────────┐  ┌─────────────────┐ │
-                        │  Agente IA  │  │   Qdrant    │  │    Supabase     │ │
-                        │ (LangChain) │  │  Vector DB  │  │   PostgreSQL    │ │
-                        └─────────────┘  └─────────────┘  └─────────────────┘ │
-                               │                                               │
-                        ┌──────▼──────┐  ┌─────────────┐  ┌─────────────────┐ │
-                        │  Chatwoot   │  │   Google    │  │     Redis       │ │
-                        │   Soporte   │  │  Calendar   │  │     Cache       │ │
-                        └─────────────┘  └─────────────┘  └─────────────────┘ │
-```
+
+### Flujo de Conversación
+
+1. **Cliente** envía mensaje vía WhatsApp
+2. **EVO API** recibe y envía webhook
+3. **AI Agent** procesa e identifica intención
+4. **Acciones** ejecutadas según necesidad:
+   - Búsqueda de propiedades (scraping)
+   - Programación de visitas
+   - Calificación de lead
+5. **Respuesta** enviada al cliente
+6. **Chatwoot** actualizado con estado
+
+Para diagramas detallados, ver [architecture.mmd](architecture.mmd).
 
 ## 🛠️ Stack Tecnológico
 
-- **Backend**: Python 3.11+, FastAPI, SQLAlchemy, Pydantic
-- **IA/ML**: LangChain, OpenAI GPT-4, Qdrant Vector Database
-- **Bases de Datos**: PostgreSQL (Supabase), Redis
-- **Mensajería**: EVO API (WhatsApp Business), Chatwoot
-- **Infraestructura**: Docker, Docker Compose
-- **Pruebas**: Pytest, Coverage
+### Backend
+- **Python 3.11+** - Lenguaje principal
+- **FastAPI** - Framework web asíncrono
+- **SQLAlchemy** - ORM con soporte async
+- **Pydantic** - Validación de datos
 
-## 📋 Prerrequisitos
+### IA & Machine Learning
+- **LangChain** - Framework para AI agents
+- **OpenAI GPT-4** - Modelo de lenguaje
+- **Qdrant** - Vector database para contexto
+- **Whisper API** - Transcripción de audio
 
-- Python 3.11+
+### Infraestructura
+- **PostgreSQL** - Base de datos principal (vía Supabase)
+- **Redis** - Cache y colas
+- **Docker** - Containerización
+- **EVO API** - Integración WhatsApp
+- **Chatwoot** - Plataforma de soporte
+
+## 📋 Prerequisitos
+
+- Python 3.11 o superior
 - Docker y Docker Compose
-- Instancia de EVO API
-- Cuenta de Supabase
-- Clave de API de OpenAI
-- Proyecto de Google Cloud con Calendar API habilitada
-- Instancia de Chatwoot (opcional)
+- Cuenta Supabase
+- Instancia EVO API configurada
+- Clave API OpenAI
+- Proyecto Google Cloud con Calendar API
+- Instancia Chatwoot (opcional)
 
-## 🚀 Inicio Rápido
+## 🚀 Instalación Rápida
 
-1. **Clonar el repositorio**
-   ```bash
-   git clone https://github.com/tuusuario/corretor-ai-hub.git
-   cd corretor-ai-hub
-   ```
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/yourusername/corretor-ai-hub.git
+cd corretor-ai-hub
+```
 
-2. **Configurar variables de entorno**
-   ```bash
-   cp .env.example .env
-   # Edite .env con sus credenciales
-   ```
+### 2. Configurar variables de entorno
+```bash
+cp .env.example .env
+# Editar .env con sus credenciales
+```
 
-3. **Iniciar servicios de infraestructura**
-   ```bash
-   docker-compose up -d
-   ```
+### 3. Iniciar servicios
+```bash
+docker-compose up -d
+```
 
-4. **Instalar dependencias**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 4. Instalar dependencias
+```bash
+python -m venv venv
+source venv/bin/activate  # En Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-5. **Ejecutar migraciones de base de datos**
-   ```bash
-   alembic upgrade head
-   ```
+### 5. Ejecutar migraciones
+```bash
+alembic upgrade head
+```
 
-6. **Iniciar el servidor de desarrollo**
-   ```bash
-   python -m uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
-   ```
+### 6. Iniciar el servidor
+```bash
+python -m uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
+```
 
-## 🔧 Configuración
+## ⚙️ Configuración
 
-Variables de entorno clave:
+### Variables de Entorno Esenciales
 
 ```bash
-# Configuración de API
+# API
 API_HOST=0.0.0.0
 API_PORT=8000
 ENVIRONMENT=development
 
 # Base de Datos
-DATABASE_URL=postgresql+asyncpg://usuario:contraseña@localhost/nombrebd
+DATABASE_URL=postgresql+asyncpg://user:pass@localhost/dbname
+REDIS_URL=redis://localhost:6379
 
-# Servicios de IA
-OPENAI_API_KEY=tu-clave-openai
-QDRANT_URL=http://localhost:6333
+# OpenAI
+OPENAI_API_KEY=sk-...
 
-# Integración WhatsApp
-EVO_API_URL=https://tu-instancia-evo.com
-EVO_API_KEY=tu-clave-evo-api
+# EVO API (WhatsApp)
+EVO_API_URL=https://your-evo-instance.com
+EVO_API_KEY=your-key
 
 # Google Calendar
-GOOGLE_CALENDAR_CREDENTIALS=json-codificado-base64
+GOOGLE_CALENDAR_CREDENTIALS=base64-encoded-json
 
 # Chatwoot
-CHATWOOT_URL=https://tu-chatwoot.com
-CHATWOOT_API_KEY=tu-clave-chatwoot
+CHATWOOT_URL=https://your-chatwoot.com
+CHATWOOT_API_KEY=your-key
+
+# Qdrant
+QDRANT_URL=http://localhost:6333
+QDRANT_API_KEY=your-key
 ```
 
 ## 📚 Documentación de la API
 
-Una vez en ejecución, acceda a la documentación interactiva de la API en:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+Con el servidor ejecutándose, acceder a:
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
 
-### Endpoints Principales
+### Principales Endpoints
 
-- `POST /webhooks/evo` - Webhook de EVO API para mensajes de WhatsApp
-- `POST /webhooks/chatwoot` - Webhook de Chatwoot para tickets de soporte
-- `GET /properties` - Listar propiedades con filtros
-- `POST /properties/search` - Búsqueda semántica de propiedades
-- `POST /appointments` - Programar visitas a propiedades
-- `GET /analytics/dashboard` - Métricas en tiempo real
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/webhooks/evo` | Webhook EVO API |
+| POST | `/webhooks/chatwoot` | Webhook Chatwoot |
+| GET | `/properties` | Lista propiedades |
+| POST | `/properties/search` | Búsqueda semántica |
+| POST | `/appointments` | Agenda visitas |
+| GET | `/leads` | Lista leads |
+| GET | `/analytics/dashboard` | Métricas |
 
-## 🧪 Pruebas
+## 🧪 Tests
 
-Ejecutar el conjunto de pruebas:
 ```bash
-# Todas las pruebas
+# Ejecutar todos los tests
 pytest
 
 # Con cobertura
 pytest --cov=src --cov-report=html
 
-# Módulo específico
+# Tests específicos
 pytest tests/test_property_agent.py -v
 ```
 
-## 📦 Estructura del Proyecto
+## 📁 Estructura del Proyecto
 
 ```
 corretor-ai-hub/
 ├── src/
-│   ├── agents/          # Lógica del agente IA
-│   ├── api/             # Aplicación FastAPI
-│   ├── core/            # Utilidades principales
-│   ├── database/        # Modelos de base de datos
+│   ├── agents/          # Lógica del AI Agent
+│   ├── api/             # Endpoints FastAPI
+│   │   └── routes/      # Rutas organizadas
+│   ├── core/            # Configuraciones y utils
+│   ├── database/        # Modelos y schemas
 │   ├── integrations/    # Servicios externos
-│   ├── scrapers/        # Scrapers de propiedades
+│   ├── scrapers/        # Web scraping
 │   └── services/        # Lógica de negocio
-├── tests/               # Conjunto de pruebas
-├── scripts/             # Scripts de utilidad
-├── config/              # Archivos de configuración
-└── docs/                # Documentación
+├── tests/               # Suite de tests
+├── scripts/             # Scripts útiles
+├── docs/                # Documentación
+└── docker-compose.yml   # Orquestación
 ```
+
+## 🔒 Seguridad
+
+- Autenticación JWT para APIs
+- Validación de webhooks
+- Rate limiting por tenant
+- Datos encriptados en reposo
+- Logs sin información sensible
+
+## 📈 Monitoreo
+
+- Health checks en `/health`
+- Métricas Prometheus en `/metrics`
+- Logs estructurados con correlation ID
+- Alertas para fallas críticas
 
 ## 🤝 Contribuyendo
 
-1. Haz un fork del repositorio
-2. Crea una rama de características (`git checkout -b feature/caracteristica-increible`)
-3. Confirma tus cambios (`git commit -m 'Agregar característica increíble'`)
-4. Empuja a la rama (`git push origin feature/caracteristica-increible`)
-5. Abre un Pull Request
+1. Fork el proyecto
+2. Crear una branch (`git checkout -b feature/AmazingFeature`)
+3. Commit sus cambios (`git commit -m 'Add AmazingFeature'`)
+4. Push a la branch (`git push origin feature/AmazingFeature`)
+5. Abrir un Pull Request
 
 ## 📄 Licencia
 
-Este proyecto está licenciado bajo la Licencia MIT - vea el archivo [LICENSE](LICENSE) para más detalles.
+Este proyecto está licenciado bajo MIT License - ver [LICENSE](LICENSE) para detalles.
 
 ## 🙏 Agradecimientos
 
-- [LangChain](https://langchain.com/) por el framework de IA
-- [EVO API](https://github.com/EvolutionAPI/evolution-api) por la integración de WhatsApp
-- [Chatwoot](https://www.chatwoot.com/) por el soporte al cliente
-- [Supabase](https://supabase.com/) por la infraestructura backend
+- [LangChain](https://langchain.com/) - Framework de IA
+- [EVO API](https://github.com/EvolutionAPI/evolution-api) - WhatsApp Business
+- [Chatwoot](https://www.chatwoot.com/) - Plataforma de soporte
+- [Supabase](https://supabase.com/) - Backend as a Service
+
+---
+
+Desarrollado con ❤️ para revolucionar el mercado inmobiliario
