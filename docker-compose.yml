@@ -1,0 +1,159 @@
+version: '3.8'
+
+services:
+  # TimescaleDB - PostgreSQL with time-series superpowers
+  timescaledb:
+    image: timescale/timescaledb-ha:pg17
+    container_name: corretor-timescaledb
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-corretor}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-corretor123}
+      POSTGRES_DB: ${POSTGRES_DB:-corretor_ai_hub}
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
+      # TimescaleDB tuning for development
+      POSTGRES_SHARED_PRELOAD_LIBRARIES: 'timescaledb,pg_stat_statements'
+      POSTGRES_MAX_CONNECTIONS: 200
+      POSTGRES_SHARED_BUFFERS: 256MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 1GB
+      POSTGRES_MAINTENANCE_WORK_MEM: 128MB
+      POSTGRES_CHECKPOINT_COMPLETION_TARGET: 0.9
+      POSTGRES_WAL_BUFFERS: 16MB
+      POSTGRES_DEFAULT_STATISTICS_TARGET: 100
+      POSTGRES_RANDOM_PAGE_COST: 1.1
+      POSTGRES_EFFECTIVE_IO_CONCURRENCY: 200
+      POSTGRES_WORK_MEM: 4MB
+      POSTGRES_MIN_WAL_SIZE: 2GB
+      POSTGRES_MAX_WAL_SIZE: 4GB
+      POSTGRES_MAX_WORKER_PROCESSES: 8
+      POSTGRES_MAX_PARALLEL_WORKERS_PER_GATHER: 4
+      POSTGRES_MAX_PARALLEL_WORKERS: 8
+      POSTGRES_MAX_PARALLEL_MAINTENANCE_WORKERS: 4
+    volumes:
+      - timescaledb_data:/home/postgres/pgdata/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-corretor} -d ${POSTGRES_DB:-corretor_ai_hub}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - corretor-network
+
+  # Redis - Cache and Message Queue
+  redis:
+    image: redis:7-alpine
+    container_name: corretor-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redis123} --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - corretor-network
+
+  # Qdrant - Vector Database for AI/ML
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: corretor-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"  # gRPC port
+    environment:
+      QDRANT__SERVICE__HTTP_PORT: 6333
+      QDRANT__SERVICE__GRPC_PORT: 6334
+      QDRANT__LOG_LEVEL: INFO
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - corretor-network
+
+  # pgAdmin - Database Management UI (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: corretor-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@corretor.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - timescaledb
+    networks:
+      - corretor-network
+    profiles:
+      - tools
+
+  # RedisInsight - Redis GUI (optional)
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    container_name: corretor-redisinsight
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    volumes:
+      - redisinsight_data:/db
+    depends_on:
+      - redis
+    networks:
+      - corretor-network
+    profiles:
+      - tools
+
+  # Application (commented out - to be configured based on your app setup)
+  # app:
+  #   build: .
+  #   container_name: corretor-app
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8000:8000"
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     DATABASE_URL: postgresql://corretor:corretor123@timescaledb:5432/corretor_ai_hub
+  #     REDIS_URL: redis://:redis123@redis:6379/0
+  #     QDRANT_HOST: qdrant
+  #     QDRANT_PORT: 6333
+  #   depends_on:
+  #     timescaledb:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #     qdrant:
+  #       condition: service_started
+  #   volumes:
+  #     - ./src:/app/src
+  #     - ./config:/app/config
+  #     - ./logs:/app/logs
+  #   networks:
+  #     - corretor-network
+
+networks:
+  corretor-network:
+    driver: bridge
+    name: corretor-network
+
+volumes:
+  timescaledb_data:
+    driver: local
+  redis_data:
+    driver: local
+  qdrant_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  redisinsight_data:
+    driver: local
