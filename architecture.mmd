@@ -1,0 +1,396 @@
+graph TB
+    %% Sistema Principal - Visão Geral
+    subgraph "Sistema Corretor AI Hub"
+        direction TB
+
+
+        subgraph "Camada de Cliente"
+            WA[WhatsApp Business<br/>Segunda linha do corretor]
+            IG[Instagram<br/>Pendente]
+            CW[Chatwoot<br/>Hub de conversas]
+        end
+
+        subgraph "Gateway de API"
+            EVO[EVO API<br/>Integração WhatsApp]
+            WEBHOOK[Webhook Handler<br/>Validação e roteamento]
+        end
+
+        subgraph "Camada de Aplicação"
+            FASTAPI[FastAPI<br/>Backend Assíncrono]
+            
+            subgraph "Serviços Core"
+                AGENT[AI Agent<br/>LangChain + GPT-4]
+                SCRAPER[Scraper REMAX<br/>Busca de imóveis]
+                MATCHER[Property Matcher<br/>Matching leads/imóveis]
+                SCHEDULER[Appointment Service<br/>Agendamento visitas]
+                NOTIFIER[Notification Service<br/>Lembretes e alertas]
+                MEDIA[Media Processor<br/>Áudio/Imagem]
+            end
+        end
+
+        subgraph "Camada de Dados"
+            subgraph "Bancos de Dados"
+                SUPABASE[(Supabase<br/>PostgreSQL<br/>Multi-tenant)]
+                QDRANT[(Qdrant<br/>Vector DB<br/>Contexto IA)]
+                REDIS[(Redis<br/>Cache e filas)]
+            end
+        end
+
+        subgraph "Serviços Externos"
+            OPENAI[OpenAI<br/>GPT-4 + Whisper]
+            GCAL[Google Calendar<br/>Por corretor]
+            CHATWOOT_API[Chatwoot API<br/>Gestão tickets]
+            REMAX[Site REMAX<br/>Argentina]
+        end
+    end
+
+    %% Conexões principais
+    WA -->|Mensagens| EVO
+    IG -.->|Futuro| EVO
+    CW -->|Interface| CHATWOOT_API
+    
+    EVO -->|Webhook| WEBHOOK
+    WEBHOOK -->|Processa| FASTAPI
+    CHATWOOT_API -->|Webhook| FASTAPI
+    
+    FASTAPI --> AGENT
+    FASTAPI --> SCRAPER
+    FASTAPI --> MATCHER
+    FASTAPI --> SCHEDULER
+    FASTAPI --> NOTIFIER
+    FASTAPI --> MEDIA
+    
+    AGENT -->|Consulta| OPENAI
+    AGENT -->|Contexto| QDRANT
+    AGENT -->|Busca| SCRAPER
+    AGENT -->|Agenda| SCHEDULER
+    
+    SCRAPER -->|Scraping| REMAX
+    SCRAPER -->|Cache| REDIS
+    
+    MATCHER -->|Leads| SUPABASE
+    MATCHER -->|Imóveis| SUPABASE
+    MATCHER -->|Notifica| NOTIFIER
+    
+    SCHEDULER -->|Compromissos| SUPABASE
+    SCHEDULER -->|Calendário| GCAL
+    SCHEDULER -->|Lembretes| NOTIFIER
+    
+    NOTIFIER -->|Fila| REDIS
+    NOTIFIER -->|Envia| EVO
+    
+    MEDIA -->|Transcrição| OPENAI
+    MEDIA -->|Cache| REDIS
+    
+    %% Estilização
+    classDef client fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef api fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef app fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef data fill:#fff8e1,stroke:#f57f17,stroke-width:2px
+    classDef external fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    
+    class WA,IG,CW client
+    class EVO,WEBHOOK,FASTAPI api
+    class AGENT,SCRAPER,MATCHER,SCHEDULER,NOTIFIER,MEDIA app
+    class SUPABASE,QDRANT,REDIS data
+    class OPENAI,GCAL,CHATWOOT_API,REMAX external
+
+---
+
+graph LR
+    %% Fluxo de Conversação WhatsApp
+    subgraph "Fluxo de Mensagem Recebida"
+        direction TB
+        
+        A[Cliente envia mensagem<br/>WhatsApp] --> B{Tipo de<br/>ativação?}
+        
+        B -->|Contato novo| C[Ativa automação]
+        B -->|Link portal imobiliário| C
+        B -->|Outro| D[Ignora mensagem]
+        
+        C --> E{Tipo de<br/>mensagem?}
+        
+        E -->|Texto| F[Processa texto]
+        E -->|Áudio| G[Transcreve áudio]
+        E -->|Imagem| H[Analisa imagem]
+        
+        F --> I[AI Agent processa]
+        G --> I
+        H --> I
+        
+        I --> J{Intenção<br/>detectada?}
+        
+        J -->|Busca imóvel| K[Scraping REMAX]
+        J -->|Agendar visita| L[Verifica calendário]
+        J -->|Informações| M[Responde com dados]
+        J -->|Falar com humano| N[Para automação]
+        
+        K --> O[Apresenta opções]
+        L --> P[Oferece horários]
+        M --> Q[Envia resposta]
+        N --> R[Notifica corretor]
+        
+        O --> S[Salva preferências<br/>do lead]
+        P --> T[Confirma agendamento]
+        Q --> U[Atualiza Chatwoot]
+        R --> V[Tag 'humano'<br/>no Chatwoot]
+    end
+    
+    %% Estilização
+    classDef start fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef process fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef action fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef end fill:#ffebee,stroke:#c62828,stroke-width:2px
+    
+    class A start
+    class B,E,J decision
+    class C,D,F,G,H,I,K,L,M,N process
+    class O,P,Q,R,S,T,U,V action
+
+---
+
+graph TB
+    %% Arquitetura Multi-Tenant
+    subgraph "Sistema Multi-Tenant"
+        direction TB
+        
+        subgraph "Tenant 1 - Corretor João"
+            T1_WA[WhatsApp<br/>+54 11 1234-5678]
+            T1_CW[Chatwoot Inbox<br/>João Silva]
+            T1_CAL[Google Calendar<br/>joao@remax.ar]
+            T1_NS[Namespace Qdrant<br/>tenant_joao]
+            T1_DATA[(Dados isolados<br/>tenant_id: uuid-1)]
+        end
+        
+        subgraph "Tenant 2 - Corretora Maria"
+            T2_WA[WhatsApp<br/>+54 11 8765-4321]
+            T2_CW[Chatwoot Inbox<br/>Maria Garcia]
+            T2_CAL[Google Calendar<br/>maria@remax.ar]
+            T2_NS[Namespace Qdrant<br/>tenant_maria]
+            T2_DATA[(Dados isolados<br/>tenant_id: uuid-2)]
+        end
+        
+        subgraph "Recursos Compartilhados"
+            SHARED_API[API FastAPI<br/>Multi-tenant aware]
+            SHARED_AI[AI Agent<br/>Contexto por tenant]
+            SHARED_SCRAPER[Scraper REMAX<br/>Cache compartilhado]
+            SHARED_DB[(Supabase<br/>Row Level Security)]
+        end
+    end
+    
+    %% Conexões
+    T1_WA --> SHARED_API
+    T2_WA --> SHARED_API
+    
+    SHARED_API --> T1_CW
+    SHARED_API --> T2_CW
+    
+    SHARED_AI --> T1_NS
+    SHARED_AI --> T2_NS
+    
+    SHARED_API --> T1_CAL
+    SHARED_API --> T2_CAL
+    
+    T1_DATA --> SHARED_DB
+    T2_DATA --> SHARED_DB
+    
+    %% Estilização
+    classDef tenant1 fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef tenant2 fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef shared fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    
+    class T1_WA,T1_CW,T1_CAL,T1_NS,T1_DATA tenant1
+    class T2_WA,T2_CW,T2_CAL,T2_NS,T2_DATA tenant2
+    class SHARED_API,SHARED_AI,SHARED_SCRAPER,SHARED_DB shared
+
+---
+
+sequenceDiagram
+    %% Fluxo de Agendamento de Visita
+    participant C as Cliente WhatsApp
+    participant E as EVO API
+    participant W as Webhook Handler
+    participant A as AI Agent
+    participant S as Scheduler Service
+    participant G as Google Calendar
+    participant N as Notification Service
+    participant CW as Chatwoot
+    
+    C->>E: "Quero agendar uma visita"
+    E->>W: Webhook com mensagem
+    W->>A: Processa intenção
+    A->>S: Solicita horários disponíveis
+    S->>G: Consulta disponibilidade
+    G-->>S: Retorna slots livres
+    S-->>A: 2 opções de horários
+    A-->>E: "Posso oferecer:<br/>1. Terça 15h<br/>2. Quinta 10h"
+    E-->>C: Envia opções
+    
+    C->>E: "Terça 15h está perfeito"
+    E->>W: Webhook com resposta
+    W->>A: Processa confirmação
+    A->>S: Confirma agendamento
+    S->>G: Cria evento no calendário
+    G-->>S: Evento criado
+    S->>N: Programa lembretes
+    S-->>A: Agendamento confirmado
+    A-->>E: "Visita confirmada para terça às 15h"
+    E-->>C: Envia confirmação
+    A->>CW: Atualiza status para "visita-agendada"
+    
+    Note over N: 24h antes da visita
+    N->>E: Envia lembrete 24h
+    E->>C: "Lembrete: visita amanhã às 15h"
+    
+    Note over N: 3h antes da visita
+    N->>E: Envia lembrete 3h
+    E->>C: "Sua visita é hoje às 15h"
+
+---
+
+graph TB
+    %% Componentes de Scraping e Matching
+    subgraph "Sistema de Scraping e Matching"
+        direction TB
+        
+        subgraph "Processo de Scraping"
+            TRIGGER[Busca solicitada<br/>ou Cron semanal]
+            SCRAPER[REMAX Scraper]
+            FILTERS[Aplicar filtros<br/>Localização, quartos, preço]
+            PARSE[Parser HTML<br/>Extrai dados]
+            CACHE[Cache Redis<br/>TTL: 1 hora]
+            STORE[Armazena em<br/>Supabase]
+        end
+        
+        subgraph "Motor de Matching"
+            LEADS[(Base de Leads<br/>com preferências)]
+            PROPS[(Base de Imóveis<br/>do corretor)]
+            ENGINE[Matching Engine<br/>Algoritmo de score]
+            MATCHES[Matches encontrados]
+            NOTIFY[Notifica corretor<br/>via WhatsApp]
+        end
+        
+        subgraph "Critérios de Matching"
+            C1[Localização<br/>Bairro/Cidade]
+            C2[Faixa de preço<br/>±20%]
+            C3[Quartos<br/>Exato ou maior]
+            C4[Área m²<br/>±15%]
+            C5[Características<br/>Piscina, garagem, etc]
+        end
+    end
+    
+    %% Conexões Scraping
+    TRIGGER --> SCRAPER
+    SCRAPER --> FILTERS
+    FILTERS --> PARSE
+    PARSE --> CACHE
+    CACHE --> STORE
+    
+    %% Conexões Matching
+    LEADS --> ENGINE
+    PROPS --> ENGINE
+    ENGINE --> C1
+    ENGINE --> C2
+    ENGINE --> C3
+    ENGINE --> C4
+    ENGINE --> C5
+    C1 --> MATCHES
+    C2 --> MATCHES
+    C3 --> MATCHES
+    C4 --> MATCHES
+    C5 --> MATCHES
+    MATCHES --> NOTIFY
+    
+    STORE -.-> PROPS
+    
+    %% Estilização
+    classDef scraping fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef matching fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef criteria fill:#fff8e1,stroke:#f57f17,stroke-width:2px
+    
+    class TRIGGER,SCRAPER,FILTERS,PARSE,CACHE,STORE scraping
+    class LEADS,PROPS,ENGINE,MATCHES,NOTIFY matching
+    class C1,C2,C3,C4,C5 criteria
+
+---
+
+stateDiagram-v2
+    %% Estados de uma Conversa
+    [*] --> Nova: Cliente envia mensagem
+    
+    Nova --> Processando: Ativação válida
+    Nova --> Ignorada: Ativação inválida
+    
+    Processando --> RespondendoIA: IA gera resposta
+    Processando --> BuscandoImoveis: Cliente busca imóvel
+    Processando --> AgendandoVisita: Cliente quer agendar
+    Processando --> InterrompidaCliente: Cliente pede humano
+    
+    RespondendoIA --> Aguardando: Resposta enviada
+    BuscandoImoveis --> ApresentandoOpcoes: Imóveis encontrados
+    AgendandoVisita --> OfferecendoHorarios: Horários disponíveis
+    
+    ApresentandoOpcoes --> Aguardando: Opções enviadas
+    OfferecendoHorarios --> VisitaAgendada: Cliente confirma
+    
+    Aguardando --> Processando: Nova mensagem
+    Aguardando --> Inativa: Timeout 24h
+    
+    InterrompidaCliente --> AtendimentoHumano: Corretor notificado
+    
+    VisitaAgendada --> LembreteEnviado: 24h/3h antes
+    LembreteEnviado --> VisitaRealizada: Após horário
+    
+    VisitaRealizada --> Followup: Pós-venda
+    AtendimentoHumano --> Resolvida: Corretor finaliza
+    
+    Ignorada --> [*]
+    Inativa --> [*]
+    Resolvida --> [*]
+    Followup --> [*]
+
+---
+
+graph TB
+    %% Modelo de Dados Simplificado
+    subgraph "Modelo de Dados Multi-Tenant"
+        TENANT[Tenants<br/>id, name, config]
+        
+        LEAD[Leads<br/>tenant_id, name, phone<br/>preferences_json]
+        
+        PROPERTY[Properties<br/>tenant_id, address<br/>rooms, price, area]
+        
+        CONVERSATION[Conversations<br/>tenant_id, lead_id<br/>chatwoot_id, status]
+        
+        MESSAGE[Messages<br/>conversation_id<br/>content, type, direction]
+        
+        APPOINTMENT[Appointments<br/>tenant_id, lead_id<br/>property_id, datetime]
+        
+        NOTIFICATION[Notifications<br/>tenant_id, type<br/>scheduled_at, sent_at]
+        
+        MATCH[PropertyMatches<br/>tenant_id, lead_id<br/>property_id, score]
+    end
+    
+    %% Relacionamentos
+    TENANT -->|1:N| LEAD
+    TENANT -->|1:N| PROPERTY
+    TENANT -->|1:N| CONVERSATION
+    TENANT -->|1:N| APPOINTMENT
+    TENANT -->|1:N| NOTIFICATION
+    
+    LEAD -->|1:N| CONVERSATION
+    LEAD -->|1:N| APPOINTMENT
+    LEAD -->|1:N| MATCH
+    
+    PROPERTY -->|1:N| APPOINTMENT
+    PROPERTY -->|1:N| MATCH
+    
+    CONVERSATION -->|1:N| MESSAGE
+    
+    %% Estilização
+    classDef entity fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef main fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    
+    class LEAD,PROPERTY,CONVERSATION,MESSAGE,APPOINTMENT,NOTIFICATION,MATCH entity
+    class TENANT main
