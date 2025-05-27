@@ -1,6 +1,6 @@
 # Corretor AI Hub
 
-🏠 **Plataforma de IA conversacional multi-tenant para corretores imobiliários**
+🏠 **Multi-tenant conversational AI platform for real estate agents**
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
@@ -8,66 +8,66 @@
 
 [English](README.md) | [Español](README.es.md) | [Português](README.pt.md)
 
-## 📋 Visão Geral
+## 📋 Overview
 
-O **Corretor AI Hub** é uma plataforma completa de automação inteligente para corretores imobiliários da REMAX Argentina. O sistema integra WhatsApp Business via EVO API com um assistente de IA conversacional, oferecendo atendimento automatizado 24/7, busca inteligente de imóveis, agendamento de visitas e gestão qualificada de leads.
+**Corretor AI Hub** is a comprehensive intelligent automation platform for REMAX Argentina real estate agents. The system integrates WhatsApp Business via EVO API with a conversational AI assistant, offering 24/7 automated service, intelligent property search, appointment scheduling, and qualified lead management.
 
-### 🎯 Principais Benefícios
+### 🎯 Key Benefits
 
-- **Atendimento 24/7**: Responde consultas instantaneamente, mesmo fora do horário comercial
-- **Qualificação Automática**: Identifica e qualifica leads com base em suas preferências
-- **Agendamento Inteligente**: Marca visitas diretamente no Google Calendar do corretor
-- **Multi-idiomas**: Suporte nativo para Português, Espanhol e Inglês
-- **Análise em Tempo Real**: Dashboard com métricas de conversão e engajamento
+- **24/7 Service**: Instantly responds to inquiries, even outside business hours
+- **Automatic Qualification**: Identifies and qualifies leads based on their preferences
+- **Smart Scheduling**: Books appointments directly in the agent's Google Calendar
+- **Multi-language**: Native support for Spanish, Portuguese, and English
+- **Real-time Analytics**: Dashboard with conversion metrics and engagement insights
 
-## 🚀 Funcionalidades
+## 🚀 Features
 
-### ✅ Implementadas
+### ✅ Implemented
 
-- **🤖 Assistente IA Conversacional**
-  - Respostas humanizadas com GPT-4
-  - Consolidação de múltiplas perguntas
-  - Detecção de intenção para handoff humano
+- **🤖 Conversational AI Assistant**
+  - Humanized responses with GPT-4
+  - Multiple question consolidation
+  - Intent detection for human handoff
   
-- **📱 Integração WhatsApp Business**
-  - Recebimento e envio de mensagens
-  - Suporte para texto, áudio e imagens
-  - Segunda linha dedicada por corretor
+- **📱 WhatsApp Business Integration**
+  - Message receiving and sending
+  - Support for text, audio, and images
+  - Dedicated second line per agent
 
-- **🏢 Sistema Multi-Tenant**
-  - Isolamento completo entre corretores
-  - Configurações personalizadas por tenant
-  - Base de dados segregada
+- **🏢 Multi-Tenant System**
+  - Complete isolation between agents
+  - Customized settings per tenant
+  - Segregated database
 
-- **📅 Gestão de Agendamentos**
-  - Integração com Google Calendar
-  - Oferece 2 opções de horários
-  - Lembretes automáticos (24h e 3h antes)
+- **📅 Appointment Management**
+  - Google Calendar integration
+  - Offers 2 time slot options
+  - Automatic reminders (24h and 3h before)
 
-- **👥 Gestão de Leads**
-  - Captura automática de dados
-  - Score de qualificação
-  - Histórico de interações
+- **👥 Lead Management**
+  - Automatic data capture
+  - Qualification scoring
+  - Interaction history
 
-- **🏷️ Classificação Automática**
-  - Tags no Chatwoot por status
-  - Priorização de atendimento
-  - Métricas de conversão
+- **🏷️ Automatic Classification**
+  - Chatwoot tags by status
+  - Service prioritization
+  - Conversion metrics
 
-### 🚧 Em Desenvolvimento
+### 🚧 In Development
 
-- **🔍 Scraping REMAX Argentina** - Busca automática de imóveis no site oficial
-- **🎯 Matching Inteligente** - Correlação entre novos imóveis e leads antigos
-- **📸 Processamento Multimídia** - Análise de imagens e transcrição de áudios
-- **🔔 Notificações Proativas** - Alertas sobre oportunidades para o corretor
+- **🔍 REMAX Argentina Scraping** - Automatic property search on official website
+- **🎯 Smart Matching** - Correlation between new properties and old leads
+- **📸 Multimedia Processing** - Image analysis and audio transcription
+- **🔔 Proactive Notifications** - Opportunity alerts for agents
 
-## 🏗️ Arquitetura
+## 🏗️ Architecture
 
-### Visão Geral do Sistema
+### System Overview
 
 ```mermaid
 graph TB
-    subgraph "Camada Cliente"
+    subgraph "Client Layer"
         WA[WhatsApp Business]
         CW[Chatwoot Hub]
     end
@@ -78,7 +78,7 @@ graph TB
         SCRAPER[REMAX Scraper]
     end
     
-    subgraph "Dados"
+    subgraph "Data"
         PG[(PostgreSQL)]
         QDRANT[(Vector DB)]
         REDIS[(Cache)]
@@ -93,90 +93,90 @@ graph TB
     API --> PG
 ```
 
-### Fluxo de Conversação
+### Conversation Flow
 
-1. **Cliente** envia mensagem via WhatsApp
-2. **EVO API** recebe e envia webhook
-3. **AI Agent** processa e identifica intenção
-4. **Ações** executadas conforme necessidade:
-   - Busca de imóveis (scraping)
-   - Agendamento de visitas
-   - Qualificação de lead
-5. **Resposta** enviada ao cliente
-6. **Chatwoot** atualizado com status
+1. **Client** sends message via WhatsApp
+2. **EVO API** receives and sends webhook
+3. **AI Agent** processes and identifies intent
+4. **Actions** executed as needed:
+   - Property search (scraping)
+   - Appointment scheduling
+   - Lead qualification
+5. **Response** sent to client
+6. **Chatwoot** updated with status
 
-Para diagramas detalhados, veja [architecture.mmd](architecture.mmd).
+For detailed diagrams, see [architecture.mmd](architecture.mmd).
 
-## 🛠️ Stack Tecnológica
+## 🛠️ Tech Stack
 
 ### Backend
-- **Python 3.11+** - Linguagem principal
-- **FastAPI** - Framework web assíncrono
-- **SQLAlchemy** - ORM com suporte async
-- **Pydantic** - Validação de dados
+- **Python 3.11+** - Main language
+- **FastAPI** - Async web framework
+- **SQLAlchemy** - ORM with async support
+- **Pydantic** - Data validation
 
-### IA & Machine Learning
-- **LangChain** - Framework para AI agents
-- **OpenAI GPT-4** - Modelo de linguagem
-- **Qdrant** - Vector database para contexto
-- **Whisper API** - Transcrição de áudio
+### AI & Machine Learning
+- **LangChain** - AI agents framework
+- **OpenAI GPT-4** - Language model
+- **Qdrant** - Vector database for context
+- **Whisper API** - Audio transcription
 
-### Infraestrutura
-- **PostgreSQL** - Banco de dados principal (via Supabase)
-- **Redis** - Cache e filas
-- **Docker** - Containerização
-- **EVO API** - Integração WhatsApp
-- **Chatwoot** - Plataforma de suporte
+### Infrastructure
+- **PostgreSQL** - Main database (via Supabase)
+- **Redis** - Cache and queues
+- **Docker** - Containerization
+- **EVO API** - WhatsApp integration
+- **Chatwoot** - Support platform
 
-## 📋 Pré-requisitos
+## 📋 Prerequisites
 
-- Python 3.11 ou superior
-- Docker e Docker Compose
-- Conta Supabase
-- Instância EVO API configurada
-- Chave API OpenAI
-- Projeto Google Cloud com Calendar API
-- Instância Chatwoot (opcional)
+- Python 3.11 or higher
+- Docker and Docker Compose
+- Supabase account
+- Configured EVO API instance
+- OpenAI API key
+- Google Cloud project with Calendar API
+- Chatwoot instance (optional)
 
-## 🚀 Instalação Rápida
+## 🚀 Quick Start
 
-### 1. Clone o repositório
+### 1. Clone the repository
 ```bash
 git clone https://github.com/yourusername/corretor-ai-hub.git
 cd corretor-ai-hub
 ```
 
-### 2. Configure as variáveis de ambiente
+### 2. Set up environment variables
 ```bash
 cp .env.example .env
-# Edite .env com suas credenciais
+# Edit .env with your credentials
 ```
 
-### 3. Inicie os serviços
+### 3. Start services
 ```bash
 docker-compose up -d
 ```
 
-### 4. Instale as dependências
+### 4. Install dependencies
 ```bash
 python -m venv venv
-source venv/bin/activate  # No Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 5. Execute as migrações
+### 5. Run migrations
 ```bash
 alembic upgrade head
 ```
 
-### 6. Inicie o servidor
+### 6. Start the server
 ```bash
 python -m uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-## ⚙️ Configuração
+## ⚙️ Configuration
 
-### Variáveis de Ambiente Essenciais
+### Essential Environment Variables
 
 ```bash
 # API
@@ -184,7 +184,7 @@ API_HOST=0.0.0.0
 API_PORT=8000
 ENVIRONMENT=development
 
-# Banco de Dados
+# Database
 DATABASE_URL=postgresql+asyncpg://user:pass@localhost/dbname
 REDIS_URL=redis://localhost:6379
 
@@ -207,90 +207,90 @@ QDRANT_URL=http://localhost:6333
 QDRANT_API_KEY=your-key
 ```
 
-## 📚 Documentação da API
+## 📚 API Documentation
 
-Com o servidor rodando, acesse:
+Once running, access:
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 
-### Principais Endpoints
+### Main Endpoints
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| POST | `/webhooks/evo` | Webhook EVO API |
-| POST | `/webhooks/chatwoot` | Webhook Chatwoot |
-| GET | `/properties` | Lista imóveis |
-| POST | `/properties/search` | Busca semântica |
-| POST | `/appointments` | Agenda visitas |
-| GET | `/leads` | Lista leads |
-| GET | `/analytics/dashboard` | Métricas |
+| Method | Endpoint               | Description      |
+|--------|------------------------|------------------|
+| POST   | `/webhooks/evo`        | EVO API webhook  |
+| POST   | `/webhooks/chatwoot`   | Chatwoot webhook |
+| GET    | `/properties`          | List properties  |
+| POST   | `/properties/search`   | Semantic search  |
+| POST   | `/appointments`        | Schedule visits  |
+| GET    | `/leads`               | List leads       |
+| GET    | `/analytics/dashboard` | Metrics          |
 
-## 🧪 Testes
+## 🧪 Testing
 
 ```bash
-# Executar todos os testes
+# Run all tests
 pytest
 
-# Com cobertura
+# With coverage
 pytest --cov=src --cov-report=html
 
-# Testes específicos
+# Specific tests
 pytest tests/test_property_agent.py -v
 ```
 
-## 📁 Estrutura do Projeto
+## 📁 Project Structure
 
 ```
 corretor-ai-hub/
 ├── src/
-│   ├── agents/          # Lógica do AI Agent
-│   ├── api/             # Endpoints FastAPI
-│   │   └── routes/      # Rotas organizadas
-│   ├── core/            # Configurações e utils
-│   ├── database/        # Modelos e schemas
-│   ├── integrations/    # Serviços externos
+│   ├── agents/          # AI Agent logic
+│   ├── api/             # FastAPI endpoints
+│   │   └── routes/      # Organized routes
+│   ├── core/            # Config and utils
+│   ├── database/        # Models and schemas
+│   ├── integrations/    # External services
 │   ├── scrapers/        # Web scraping
-│   └── services/        # Lógica de negócio
-├── tests/               # Suite de testes
-├── scripts/             # Scripts úteis
-├── docs/                # Documentação
-└── docker-compose.yml   # Orquestração
+│   └── services/        # Business logic
+├── tests/               # Test suite
+├── scripts/             # Utility scripts
+├── docs/                # Documentation
+└── docker-compose.yml   # Orchestration
 ```
 
-## 🔒 Segurança
+## 🔒 Security
 
-- Autenticação JWT para APIs
-- Validação de webhooks
-- Rate limiting por tenant
-- Dados criptografados em repouso
-- Logs sem informações sensíveis
+- JWT authentication for APIs
+- Webhook validation
+- Rate limiting per tenant
+- Encrypted data at rest
+- Logs without sensitive information
 
-## 📈 Monitoramento
+## 📈 Monitoring
 
-- Health checks em `/health`
-- Métricas Prometheus em `/metrics`
-- Logs estruturados com correlation ID
-- Alertas para falhas críticas
+- Health checks at `/health`
+- Prometheus metrics at `/metrics`
+- Structured logs with correlation ID
+- Alerts for critical failures
 
-## 🤝 Contribuindo
+## 🤝 Contributing
 
-1. Fork o projeto
-2. Crie uma branch (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📄 Licença
+## 📄 License
 
-Este projeto está licenciado sob a MIT License - veja [LICENSE](LICENSE) para detalhes.
+This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
 
-## 🙏 Agradecimentos
+## 🙏 Acknowledgments
 
-- [LangChain](https://langchain.com/) - Framework de IA
+- [LangChain](https://langchain.com/) - AI framework
 - [EVO API](https://github.com/EvolutionAPI/evolution-api) - WhatsApp Business
-- [Chatwoot](https://www.chatwoot.com/) - Plataforma de suporte
+- [Chatwoot](https://www.chatwoot.com/) - Support platform
 - [Supabase](https://supabase.com/) - Backend as a Service
 
 ---
 
-Desenvolvido com ❤️ para revolucionar o mercado imobiliário
+Built with ❤️ to revolutionize the real estate market

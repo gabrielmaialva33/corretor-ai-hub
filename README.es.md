@@ -215,15 +215,15 @@ Con el servidor ejecutándose, acceder a:
 
 ### Principales Endpoints
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| POST | `/webhooks/evo` | Webhook EVO API |
-| POST | `/webhooks/chatwoot` | Webhook Chatwoot |
-| GET | `/properties` | Lista propiedades |
-| POST | `/properties/search` | Búsqueda semántica |
-| POST | `/appointments` | Agenda visitas |
-| GET | `/leads` | Lista leads |
-| GET | `/analytics/dashboard` | Métricas |
+| Método | Endpoint               | Descripción        |
+|--------|------------------------|--------------------|
+| POST   | `/webhooks/evo`        | Webhook EVO API    |
+| POST   | `/webhooks/chatwoot`   | Webhook Chatwoot   |
+| GET    | `/properties`          | Lista propiedades  |
+| POST   | `/properties/search`   | Búsqueda semántica |
+| POST   | `/appointments`        | Agenda visitas     |
+| GET    | `/leads`               | Lista leads        |
+| GET    | `/analytics/dashboard` | Métricas           |
 
 ## 🧪 Tests
 
