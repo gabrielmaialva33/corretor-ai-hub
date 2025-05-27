@@ -207,3 +207,6 @@ qdrant_storage/
 # Message queue
 redis_data/
 celerybeat-schedule.db
+
+# Claude Code
+.claude
